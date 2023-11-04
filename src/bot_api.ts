@@ -1,19 +1,23 @@
-import fetch from "cross-fetch";
+// import fetch from "cross-fetch";
+
+export type Guild = {
+  url: string; // guild image url
+  id: string; // guild id
+  name: string; // guild name
+  icon: string; // guild icon id
+};
+
+export type User = {
+  id: string; // User id
+  username: string;
+  discriminator: string; // No longer used
+  avatar: string; // avatar id
+  avatarUrl: string; // avatar image url for user
+};
 
 export type Identity = {
-  user: {
-    id: string; // User id
-    username: string;
-    discriminator: string; // No longer used
-    avatar: string; // avatar id
-    avatarUrl: string; // avatar image url for user
-  };
-  guild: {
-    url: string; // guild image url
-    id: string; // guild id
-    name: string; // guild name
-    icon: string; // guild icon id
-  };
+  user: User;
+  guild: Guild;
   token: string;
 };
 

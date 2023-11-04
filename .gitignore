@@ -1,1 +1,4 @@
 node_modules
+dist
+test/identity.json
+test/local-storage
