@@ -144,7 +144,7 @@ export class Compendium extends EventEmitter {
           throw new Error("Data corrupt");
         }
       } catch (e) {
-        //if there was data and it failed to parse, emit a connectfsailed
+        // if there was data and it failed to parse, emit a connectfailed
         this.clearData();
         this.emit("connectfailed", (e as Error).message);
         return null;
