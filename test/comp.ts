@@ -7,7 +7,7 @@ import path from "path";
 
 global.localStorage = new LocalStorage(path.resolve(__dirname, "local-storage"));
 
-// Run this once with a code fromt eh %connect command on the command line to establish a connection
+// Run this once with a code from the %connect command on the command line to establish a connection
 async function main() {
   // Catch and report events
   const client = new Compendium();
@@ -44,11 +44,11 @@ async function main() {
   if (tl) {
     console.log(tl[701]);
   }
-  await client.setTechLevel(701, 7);
+  await client.setTechLevel(701, 3);
 
   // Compendium also supports corpdata with an optional role (corpdata returns the list of available roles)
-  const cd = await client.corpdata();
-  console.log(cd);
+  // const cd = await client.corpdata();
+  // console.log(cd);
   client.shutdown();
 }
 main().then(() => console.log("DONE"));

@@ -8,10 +8,14 @@ local storage and provides a simpler interface for front ends.
 */
 const REFRESH_MS = 5 * 60 * 1000;
 
-const IDENTITY_KEY = "hscompendium-identity";
-const USERDATA_KEY = "hscompendium-userdata";
-const REFRESH_KEY = "hscompendium-refreshed";
-const TOKEN_REFRESH = "hscompendium_tokenrefresh";
+const STORAGE_KEY = "hscompendium";
+
+type StorageData = {
+  ident: Identity;
+  userData: SyncData;
+  refresh: number;
+  tokenRefresh: number;
+};
 
 export class Compendium extends EventEmitter {
   public client: CompendiumApiClient;
@@ -41,36 +45,14 @@ export class Compendium extends EventEmitter {
   */
   public async initialize() {
     this.ident = null;
-    const identity = localStorage.getItem(IDENTITY_KEY);
-    if (!identity) {
-      this.clearData();
-    } else {
-      try {
-        const ident = JSON.parse(identity);
-        if (ident) {
-          this.ident = await this.client.refreshConnection(ident.token);
-          this.lastRefresh = Number(localStorage.getItem(REFRESH_KEY) ?? 0);
-          this.lastTokenRefresh = Number(localStorage.getItem(TOKEN_REFRESH) ?? 0);
-          this.emit("connected", this.ident);
-          const syncData = localStorage.getItem(USERDATA_KEY);
-          if (syncData) {
-            try {
-              this.syncData = JSON.parse(syncData);
-            } catch (_e) {
-              this.syncData = null;
-            }
-          }
-          if (!this.syncData) {
-            await this.syncUserData("get");
-          } else {
-            await this.syncUserData("sync");
-          }
-        }
-      } catch (e) {
-        this.clearData();
-        this.emit("connectfailed", (e as Error).message);
-        throw e;
+    const ident = this.readStorage();
+    if (ident) {
+      if (!this.syncData || Object.entries(this.syncData.techLevels).length === 0) {
+        await this.syncUserData("get");
+      } else {
+        await this.syncUserData("sync");
       }
+      this.emit("connected", this.ident);
     }
     this.timer = setInterval(() => this.tick(), REFRESH_MS);
   }
@@ -95,11 +77,10 @@ export class Compendium extends EventEmitter {
     this.ident = await this.client.connect(ident);
     this.emit("connected", this.ident);
 
-    localStorage.setItem(IDENTITY_KEY, JSON.stringify(this.ident));
     this.lastTokenRefresh = Date.now();
-    localStorage.setItem(TOKEN_REFRESH, this.lastTokenRefresh.toString());
+    this.writeStorage();
 
-    this.syncUserData("get");
+    await this.syncUserData("get");
     return this.ident;
   }
 
@@ -131,11 +112,48 @@ export class Compendium extends EventEmitter {
     await this.syncUserData("sync");
   }
 
+  private writeStorage() {
+    if (!this.ident) {
+      return;
+    }
+    const data: StorageData = {
+      ident: this.ident,
+      userData: this.syncData ?? { ver: 1, inSync: 1, techLevels: {} },
+      refresh: this.lastRefresh,
+      tokenRefresh: this.lastTokenRefresh,
+    };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  }
+
+  private readStorage(): Identity | null {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    // Validate identity. Reasonable defaults elsewhere
+    if (!raw) {
+      this.clearData();
+      return null;
+    } else {
+      try {
+        const stored = JSON.parse(raw);
+        if (stored && stored.ident) {
+          this.ident = stored.ident;
+          this.syncData = stored.syncData ?? { ver: 1, inSync: 1, techLevels: {} };
+          this.lastRefresh = Number(stored.refresh ?? 0);
+          this.lastTokenRefresh = Number(stored.lastTokenRefresh ?? 0);
+          return this.ident;
+        } else {
+          throw new Error("Data corrupt");
+        }
+      } catch (e) {
+        //if there was data and it failed to parse, emit a connectfsailed
+        this.clearData();
+        this.emit("connectfailed", (e as Error).message);
+        return null;
+      }
+    }
+  }
+
   private clearData() {
-    localStorage.removeItem(IDENTITY_KEY);
-    localStorage.removeItem(USERDATA_KEY);
-    localStorage.removeItem(REFRESH_KEY);
-    localStorage.removeItem(TOKEN_REFRESH);
+    localStorage.removeItem(STORAGE_KEY);
     this.ident = null;
     this.lastTokenRefresh = 0;
     this.lastRefresh = 0;
@@ -147,9 +165,8 @@ export class Compendium extends EventEmitter {
       throw new Error("Cannot sync user data - not connected");
     }
     this.syncData = await this.client.sync(this.ident.token, mode, this.syncData?.techLevels ?? {});
-    localStorage.setItem(USERDATA_KEY, JSON.stringify(this.syncData));
     this.lastRefresh = Date.now();
-    localStorage.setItem(REFRESH_KEY, this.lastRefresh.toString());
+    this.writeStorage();
     this.emit("sync", this.syncData.techLevels);
   }
 
@@ -160,9 +177,8 @@ export class Compendium extends EventEmitter {
         // but may occur in a hybrid mobile app
         try {
           this.ident = await this.client.refreshConnection(this.ident.token);
-          localStorage.setItem(IDENTITY_KEY, JSON.stringify(this.ident));
           this.lastTokenRefresh = Date.now();
-          localStorage.setItem(TOKEN_REFRESH, this.lastTokenRefresh.toString());
+          this.writeStorage();
         } catch (e) {
           this.clearData();
           this.emit("connectfailed", (e as Error).message);
