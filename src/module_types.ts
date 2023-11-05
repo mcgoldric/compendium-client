@@ -1,6 +1,81 @@
 // Map ids used in the Compendium app to tech names used here
 // Map string ids to numeric ids
-// This needs to be updated for DN
+export const ModuleMap: Record<string, number> = {
+  RedStarScanner: 701,
+  ShipmentRelay: 702,
+
+  AllianceLevel: 801,
+
+  Transport: 103,
+  Miner: 102,
+  Battleship: 101,
+
+  TransportCapacity: 401,
+  ShipmentComputer: 402,
+  RemoteRepair: 413,
+  Rush: 404,
+  Stealth: 608,
+  TradeBurst: 405,
+  ShipmentDrone: 406,
+  RedStarExtender: 603,
+  RelicDrone: 412,
+  Dispatch: 411,
+  CargoRocket: 414,
+
+  MiningBoost: 501,
+  HydroReplicator: 511,
+  ArtifactBoost: 512,
+  MassMining: 504,
+  Genesis: 508,
+  Enrich: 503,
+  Crunch: 507,
+  HydrogenUpload: 505,
+  HydroRocket: 510,
+  BlastDrone: 513,
+
+  Laser: 203,
+  MassBattery: 204,
+  Battery: 202,
+  DualLaser: 205,
+  Barrage: 206,
+  DartLauncher: 207,
+  ChainRay: 208,
+  PlayerRocketLauncher: 209,
+  Pulse: 210,
+
+  AlphaShield: 301,
+  ImpulseShield: 302,
+  PassiveShield: 303,
+  OmegaShield: 304,
+  BlastShield: 306,
+  MirrorShield: 305,
+  AreaShield: 307,
+  MotionShield: 308,
+
+  EMP: 601,
+  Solitude: 625,
+  Fortify: 609,
+  Teleport: 602,
+  DamageAmplifier: 626,
+  Destiny: 614,
+  Barrier: 615,
+  Vengeance: 616,
+  DeltaRocket: 617,
+  Leap: 618,
+  Bond: 619,
+  Suspend: 622,
+  OmegaRocket: 621,
+  RemoteBomb: 623,
+
+  DecoyDrone: 901,
+  RepairDrone: 902,
+  RocketDrone: 904,
+  LaserTurret: 624,
+  ChainRayDrone: 905,
+  DeltaDrones: 906,
+  DroneSquad: 907,
+};
+/*
 const types: Record<string, number> = {
   rs: 701,
   shipmentrelay: 702,
@@ -95,13 +170,14 @@ const types: Record<string, number> = {
   deltadrone: 906, // DN
   dronesquad: 907, // DN
 };
+*/
 
 let inverted_data: Record<number, string> = {};
 let inverted_data_initialized = false;
 
 export function getTechIndex(tech: string): number {
-  if (Object.prototype.hasOwnProperty.call(types, tech)) {
-    return types[tech];
+  if (Object.prototype.hasOwnProperty.call(ModuleMap, tech)) {
+    return ModuleMap[tech];
   } else {
     return 0;
   }
@@ -109,7 +185,7 @@ export function getTechIndex(tech: string): number {
 
 function checkInvert() {
   if (!inverted_data_initialized) {
-    inverted_data = Object.fromEntries(Object.entries(types).map((e) => [e[1], e[0]]));
+    inverted_data = Object.fromEntries(Object.entries(ModuleMap).map((e) => [e[1], e[0]]));
     inverted_data_initialized = true;
   }
 }
@@ -124,86 +200,10 @@ export function getTechFromIndex(index: number) {
 }
 
 export function getTypes(): Record<string, number> {
-  return types;
+  return ModuleMap;
 }
 
 export function getInvertedTypes(): Record<number, string> {
   checkInvert();
   return inverted_data;
 }
-
-export const ModuleMap = {
-  RedStarScanner: 701,
-  ShipmentRelay: 702,
-
-  AllianceLevel: 801,
-
-  Transport: 103,
-  Miner: 102,
-  Battleship: 101,
-
-  TransportCapacity: 401,
-  ShipmentComputer: 402,
-  RemoteRepair: 413,
-  Rush: 404,
-  Stealth: 608,
-  TradeBurst: 405,
-  ShipmentDrone: 406,
-  RedStarExtender: 603,
-  RelicDrone: 412,
-  Dispatch: 411,
-  CargoRocket: 414,
-
-  MiningBoost: 501,
-  HydroReplicator: 511,
-  ArtifactBoost: 512,
-  MassMining: 504,
-  Genesis: 508,
-  Enrich: 503,
-  Crunch: 507,
-  HydrogenUpload: 505,
-  HydroRocket: 510,
-  BlastDrone: 513,
-
-  Laser: 203,
-  MassBattery: 204,
-  Battery: 202,
-  DualLaser: 205,
-  Barrage: 206,
-  DartLauncher: 207,
-  ChainRay: 208,
-  PlayerRocketLauncher: 209,
-  Pulse: 210,
-
-  AlphaShield: 301,
-  ImpulseShield: 302,
-  PassiveShield: 303,
-  OmegaShield: 304,
-  BlastShield: 306,
-  MirrorShield: 305,
-  AreaShield: 307,
-  MotionShield: 308,
-
-  EMP: 601,
-  Solitude: 625,
-  Fortify: 609,
-  Teleport: 602,
-  DamageAmplifier: 626,
-  Destiny: 614,
-  Barrier: 615,
-  Vengeance: 616,
-  DeltaRocket: 617,
-  Leap: 618,
-  Bond: 619,
-  Suspend: 622,
-  OmegaRocket: 621,
-  RemoteBomb: 623,
-
-  DecoyDrone: 901,
-  RepairDrone: 902,
-  RocketDrone: 904,
-  LaserTurret: 624,
-  ChainRayDrone: 905,
-  DeltaDrones: 906,
-  DroneSquad: 907,
-};

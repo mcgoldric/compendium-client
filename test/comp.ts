@@ -44,7 +44,7 @@ async function main() {
   if (tl) {
     console.log(tl[701]);
   }
-  await client.setTechLevel(701, 3);
+  await client.setTechLevel(701, 4);
 
   // Compendium also supports corpdata with an optional role (corpdata returns the list of available roles)
   // const cd = await client.corpdata();
